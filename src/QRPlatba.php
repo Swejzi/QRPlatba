@@ -27,6 +27,8 @@ use Endroid\QrCode\Writer\SvgWriter;
 use Endroid\QrCode\Writer\WriterInterface;
 use InvalidArgumentException;
 use Exception;
+use Iban\Validation\Validator as IbanValidator;
+use Iban\Validation\Iban;
 
 /**
  * Knihovna pro generování QR plateb v PHP.
@@ -138,15 +140,37 @@ class QRPlatba
     }
 
     /**
-     * Nastavení čísla účtu ve formátu 12-3456789012/0100.
+     * Nastavení čísla účtu ve formátu 12-3456789012/0100 nebo IBAN formátu.
      *
-     * @param string $account
+     * @param string $account Číslo účtu ve formátu 12-3456789012/0100 nebo IBAN formátu
      *
      * @return $this
+     * @throws \InvalidArgumentException Pokud je IBAN neplatný
      */
     public function setAccount(string $account): self
     {
-        $this->keys['ACC'] = self::accountToIban($account);
+        // Pokud je účet již v IBAN formátu, ověříme jeho platnost
+        if (str_starts_with($account, 'CZ')) {
+            $iban = new Iban($account);
+            $validator = new IbanValidator();
+
+            if (!$validator->validate($iban)) {
+                throw new \InvalidArgumentException(sprintf('IBAN %s is not valid.', $account));
+            }
+
+            $this->keys['ACC'] = $account;
+        } else {
+            // Jinak převedeme na IBAN a ověříme platnost
+            $ibanString = self::accountToIban($account);
+            $iban = new Iban($ibanString);
+            $validator = new IbanValidator();
+
+            if (!$validator->validate($iban)) {
+                throw new \InvalidArgumentException(sprintf('Account number %s cannot be converted to a valid IBAN.', $account));
+            }
+
+            $this->keys['ACC'] = $ibanString;
+        }
 
         return $this;
     }
