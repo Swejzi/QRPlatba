@@ -17,13 +17,13 @@ Tato knihovna umožňuje:
 obrázek tak není třeba ukládat na server (```$qrPlatba->getQRCodeImage()```)
 - uložení obrázku s QR kódem (```$qrPlatba->saveQRCodeImage()```)
 - získání data-uri (```$qrPlatba->getQRCodeResult()->getDataUri()```)
-- získání instance objektu [QrCode](https://github.com/endroid/QrCode) (```$qrPlatba->getQRCodeInstance()```) 
+- získání instance objektu [QrCode](https://github.com/endroid/QrCode) (```$qrPlatba->getQRCodeInstance()```)
 
 QRPlatbu v současné době podporují tyto banky:
 Air Bank, Česká spořitelna, ČSOB, Equa bank, Era, Fio banka, Komerční banka, mBank, Raiffeisenbank, ZUNO.
 
 
-Podporuje PHP od 7.3 až 8.0.
+Podporuje PHP od 8.1.
 
 ## Instalace pomocí Composeru
 
@@ -48,7 +48,7 @@ $qrPlatba->setAccount('12-3456789012/0100')
     ->setCurrency('CZK') // Výchozí je CZK, lze zadat jakýkoli ISO kód měny
     ->setDueDate(new \DateTime());
 
-echo $qrPlatba->getQRCodeImage(); // Zobrazí <img> tag s kódem, viz níže  
+echo $qrPlatba->getQRCodeImage(); // Zobrazí <img> tag s kódem, viz níže
 ```
 
 ![Ukázka](qrcode.png)
@@ -74,7 +74,7 @@ $qrPlatba->saveQRCodeImage("qrcode.png", 100, 0, "png");
 $qrPlatba->saveQRCodeImage("qrcode.svg", 100, 0, "svg");
 ```
 
-Aktuální možné formáty jsou: 
+Aktuální možné formáty jsou:
 * Png
 * Pdf
 * Svg

@@ -11,10 +11,12 @@
 
 namespace Swejzi\QRPlatba;
 
-use BaconQrCode\Exception\WriterException;
 use DateTime;
 use Endroid\QrCode\Builder\Builder;
 use Endroid\QrCode\Color\Color;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Writer\BinaryWriter;
 use Endroid\QrCode\Writer\DebugWriter;
 use Endroid\QrCode\Writer\EpsWriter;
@@ -24,6 +26,7 @@ use Endroid\QrCode\Writer\Result\ResultInterface;
 use Endroid\QrCode\Writer\SvgWriter;
 use Endroid\QrCode\Writer\WriterInterface;
 use InvalidArgumentException;
+use Exception;
 
 /**
  * Knihovna pro generování QR plateb v PHP.
@@ -392,26 +395,30 @@ class QRPlatba
      * @param string $format
      *
      * @return \Endroid\QrCode\Writer\Result\ResultInterface
-     * @throws \BaconQrCode\Exception\WriterException
+     * @throws \Exception
      */
     public function getQRCodeResult(int $size = 300, int $margin = 0, string $format = self::FORMAT_PNG): ResultInterface
     {
-        $qrCodeBuilder = Builder::create()
-            ->data((string)$this)
-            ->size($size)
-            ->margin($margin)
-            ->foregroundColor(new Color(0, 0, 0, 0))
-            ->backgroundColor(new Color(255, 255, 255, 0))
-            ->writer($this->getWriterByFormat($format));
+        $builder = new Builder(
+            data: (string)$this,
+            encoding: new Encoding('UTF-8'),
+            errorCorrectionLevel: ErrorCorrectionLevel::High,
+            size: $size,
+            margin: $margin,
+            roundBlockSizeMode: RoundBlockSizeMode::Margin,
+            foregroundColor: new Color(0, 0, 0),
+            backgroundColor: new Color(255, 255, 255),
+            writer: $this->getWriterByFormat($format)
+        );
 
-        return $qrCodeBuilder->build();
+        return $builder->build();
     }
 
     /**
      * @param string $format
      *
      * @return \Endroid\QrCode\Writer\WriterInterface
-     * @throws \BaconQrCode\Exception\WriterException
+     * @throws \Exception
      */
     private function getWriterByFormat(string $format): WriterInterface
     {
@@ -430,7 +437,7 @@ class QRPlatba
                 return new SvgWriter();
         }
 
-        throw new WriterException('Writer is not defined.');
+        throw new Exception('Writer is not defined.');
     }
 
     /**
@@ -442,7 +449,7 @@ class QRPlatba
      * @param string $format
      *
      * @return QRPlatba
-     * @throws \BaconQrCode\Exception\WriterException
+     * @throws \Exception
      */
     public function saveQRCodeImage(?string $filename = null, int $size = 300, int $margin = 0, string $format = self::FORMAT_PNG): self
     {
